@@ -18,5 +18,8 @@
     <ClCompile Include="terio.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="terio_main.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
