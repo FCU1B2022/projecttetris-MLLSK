@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="terio_main.cpp">
+    <ClCompile Include="terio_main.c">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
