@@ -479,7 +479,7 @@ void beginning() {
     while (1)
     {
         printf("\033[0;34m"); // set color to red
-        printf(" ######   #######  ######   ######    ####     #####");
+        printf(" ######   #######  ######   ######    ####     #####\n");
         printf(" # ## #    ##   #  # ## #    ##  ##    ##     ##   ##   Weclome to play this game.\n");
         printf("   ##      ## #      ##      ##  ##    ##     #         Please choice the mode:\n");
         printf("   ##      ####      ##      #####     ##      #####    Easy enter number 1\n");
