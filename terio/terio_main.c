@@ -1,3 +1,5 @@
+﻿#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,8 +11,9 @@
 #define ROTATE_KEY 0x26   // The key to rotate, default = 0x26 (up arrow)
 #define DOWN_KEY 0x28     // The key to move down, default = 0x28 (down arrow)
 #define FALL_KEY 0x20     // The key to fall, default = 0x20 (spacebar)
+#define ctrl_KEY 0x11
 
-#define FALL_DELAY 500    // The delay between each fall, default = 500
+int FALL_DELAY;   // The delay between each fall, default = 500
 #define RENDER_DELAY 100  // The delay between each frame, default = 100
 
 #define LEFT_FUNC() GetAsyncKeyState(LEFT_KEY) & 0x8000
@@ -18,6 +21,7 @@
 #define ROTATE_FUNC() GetAsyncKeyState(ROTATE_KEY) & 0x8000
 #define DOWN_FUNC() GetAsyncKeyState(DOWN_KEY) & 0x8000
 #define FALL_FUNC() GetAsyncKeyState(FALL_KEY) & 0x8000
+#define ctrl_FUNC() GetAsyncKeyState(ctrl_KEY) & 0x8000
 
 #define CANVAS_WIDTH 10
 #define CANVAS_HEIGHT 20
@@ -56,6 +60,9 @@ typedef struct
     int x;
     int y;
     int score;
+    int scoreget;
+    int gun;
+    int guncoldtime;
     int rotate;
     int fallTime;
     ShapeId queue[4];
@@ -329,7 +336,6 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
         }
         printf("\033[0m|\n");
     }
-
     Shape shapeData = shapes[state->queue[1]];
     printf("\033[%d;%dHNext:", 3, CANVAS_WIDTH * 2 + 5);
     for (int i = 1; i <= 3; i++)
@@ -347,6 +353,8 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             }
         }
     }
+    printf("\033[%d;%dHScore: %d", CANVAS_HEIGHT + 2, 0, state->scoreget);
+    printf("\033[%d;%dAGun: %d", CANVAS_HEIGHT + 3, 0, state->gun);
     return;
 }
 
@@ -418,7 +426,17 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     else if (FALL_FUNC()) {
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
     }
-
+    if (state->guncoldtime > 0) {
+        state->guncoldtime--;
+    }
+    else if (ctrl_FUNC() && state->gun > 0) {
+        state->gun--;
+        state->guncoldtime = 5;
+        for (int k = 0; k < CANVAS_WIDTH; k++)
+            {
+                resetBlock(&canvas[19][k]);
+            }
+    }
     state->fallTime += RENDER_DELAY;
 
     while (state->fallTime >= FALL_DELAY) {
@@ -428,7 +446,12 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             state->y++;
         }
         else {
-            state->score += clearLine(canvas);
+            state->scoreget += 1;
+            int a = clearLine(canvas);
+            state->score += a;
+            if (a >0) {
+                state->scoreget += a*100;
+            }
 
             state->x = CANVAS_WIDTH / 2;
             state->y = 0;
@@ -442,11 +465,49 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
             {
                 printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT - 3, CANVAS_WIDTH * 2 + 5, CANVAS_HEIGHT + 5, 0);
+                printf("\033[%d;%dHScore: %d", 20, CANVAS_WIDTH * 2 + 5, state->scoreget);
                 exit(0);
             }
         }
     }
+
     return;
+}
+
+void beginning() {
+    system("cls");
+    while (1)
+    {
+        printf("\033[0;34m"); // set color to red
+        printf(" ######   #######  ######   ######    ####     #####");
+        printf(" # ## #    ##   #  # ## #    ##  ##    ##     ##   ##   Weclome to play this game.\n");
+        printf("   ##      ## #      ##      ##  ##    ##     #         Please choice the mode:\n");
+        printf("   ##      ####      ##      #####     ##      #####    Easy enter number 1\n");
+        printf("   ##      ## #      ##      ## ##     ##          ##   Normal enter number 2.\n");
+        printf("   ##      ##   #    ##      ##  ##    ##     ##   ##\n");
+        printf("  ####    #######   ####    #### ##   ####     #####\n");
+        printf("\033[0m"); // reset color to default
+        printf("Enter number : ");
+        int mode;
+        scanf("%d",&mode);
+        if (mode > 0 &&mode < 3) // 確定輸入的選擇在這幾項之間(不是的話要重新輸入)
+        {
+            if (mode == 1)
+            {
+                FALL_DELAY = 500;        // 調整速度
+                break;
+            }
+            else if (mode == 2)
+            {
+                FALL_DELAY = 300;
+                break;
+            }
+        }
+        else
+        {
+            printf("Please re-enter your number");
+        }
+    }
 }
 
 int main()
@@ -457,8 +518,12 @@ int main()
         .y = 0,
         .score = 0,
         .rotate = 0,
-        .fallTime = 0
+        .fallTime = 0,
+        .scoreget = 0,
+        .gun=5
     };
+
+    beginning();
 
     for (int i = 0; i < 4; i++)
     {
