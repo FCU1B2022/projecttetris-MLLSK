@@ -353,10 +353,9 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             }
         }
     }
-    printf("\033[%d;%dHScore: %d", CANVAS_HEIGHT + 2, 0, state->scoreget);
-    printf("\033[%d;%dAGun: %d", CANVAS_HEIGHT + 3, 0, state->gun);
+    printf("\033[%d;%dHScore: %d", CANVAS_HEIGHT + 2, 0, state->scoreget);//輸出分數的部分
+    printf("\033[%d;%dAGun: %d", CANVAS_HEIGHT + 3, 0, state->gun);//輸出可使用技能的部分
     return;
-}
 
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]) {
     for (int i = 0; i < CANVAS_HEIGHT; i++) {
@@ -426,10 +425,10 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     else if (FALL_FUNC()) {
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
     }
-    if (state->guncoldtime > 0) {
+    if (state->guncoldtime > 0) {//檢測是否經過冷卻時間
         state->guncoldtime--;
     }
-    else if (ctrl_FUNC() && state->gun > 0) {
+    else if (ctrl_FUNC() && state->gun > 0) {//檢測是否按下ctrl或使用技能次數>0
         state->gun--;
         state->guncoldtime = 5;
         for (int k = 0; k < CANVAS_WIDTH; k++)
@@ -450,7 +449,7 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             int a = clearLine(canvas);
             state->score += a;
             if (a >0) {
-                state->scoreget += a*100;
+                state->scoreget += a*100;//每消除幾行加幾分
             }
 
             state->x = CANVAS_WIDTH / 2;
@@ -523,7 +522,7 @@ int main()
         .gun=5
     };
 
-    beginning();
+    beginning();//宣告開頭畫面
 
     for (int i = 0; i < 4; i++)
     {
